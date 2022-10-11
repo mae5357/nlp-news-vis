@@ -2,6 +2,12 @@
 
 repo for cse6040 group project. 
 
+## Notebook & Vis
+
+See `src/notebooks/news-vis.ipynb` for src notebook.
+
+See https://public.tableau.com/views/newsscatterplotproofofconcept/Sheet1?:showVizHome=no#3 for example visualization.
+
 ## Setup
 
 ### Make a virtual environment & install dependencies
@@ -24,7 +30,7 @@ https://www.kaggle.com/datasets/rmisra/news-category-dataset
 
 Place json file `data/` directory.
 
-### Housekeeping
+## Housekeeping
 
 Do not commit data or dependancies to repo (see .gitignore)
 
