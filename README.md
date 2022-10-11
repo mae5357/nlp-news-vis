@@ -1,12 +1,12 @@
 # nlp-news-vis
 
-repo for cse6040 group project
+repo for cse6040 group project. 
 
 ## Setup
 
 ### Make a virtual environment & install dependencies
 
-```bash
+
 
 (assuming you already have conda and python3 installed)
  1. `conda create -n venv python=3.8`
@@ -18,8 +18,18 @@ repo for cse6040 group project
 
 ### Download data
 
+You might need to make a kaggle account. 
+
 https://www.kaggle.com/datasets/rmisra/news-category-dataset
 
-Place in `data/` directory.
+Place json file `data/` directory.
 
+### Housekeeping
 
+Do not commit data or dependancies to repo (see .gitignore)
+
+Update `requirements.txt` every time you add a package.
+
+Create branches with `{your-name}.{purpose-of-branch}
+
+It would be good to have someone review before merging branches, but this is not strictly necessary.
