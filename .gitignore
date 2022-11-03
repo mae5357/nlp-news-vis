@@ -132,6 +132,8 @@ dmypy.json
 !.gitkeep
 
 # data folder
-data/**
+data/clean_corpus/**
+data/raw_corpus/**
+data/embeddings/**
 
 .vscode/
