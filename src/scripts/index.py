@@ -1,13 +1,16 @@
 # import all other scripts
 
-from . import news, preprocessing, reduce, vectorization
+import news
+import preprocessing
+import reduce
+import vectorization
 
 
 def main():
     news.news_main()
     preprocessing.preprocessing_main()
-    vectorization.vectorization_main()
-    reduce.reduce_main()
+    vectorization.vectorization_main("transformer")
+    reduce.reducer_main()
 
 
 if __name__ == "__main__":

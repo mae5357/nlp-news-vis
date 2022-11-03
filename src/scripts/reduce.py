@@ -20,7 +20,7 @@ def dict_to_numpy(corpus_dict):
     return data
 
 
-def dimensionalreduction_main(embedding_type="transformer"):
+def reducer_main(embedding_type="transformer"):
     # load corpus
     date = datetime.date.today().strftime("%Y-%m-%d")
     corpus = load_corpus(f"../../data/embeddings/{embedding_type}_{date}.json")
@@ -67,4 +67,4 @@ def dimensionalreduction_main(embedding_type="transformer"):
 
 
 if __name__ == "__main__":
-    dimensionalreduction_main()
+    reducer_main()

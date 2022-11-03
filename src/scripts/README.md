@@ -86,3 +86,10 @@ The final data is stored in `data/plot_data` directory. It is a csv file with th
 x-corrdinate, y-coordinate, article-url, domain (new source)
 ```
 
+# `index.py`
+
+Use this script to run the entire pipeline. It will run the news, preprocess, vectorize, and reduce scripts. 
+
+```python
+python3 index.py
+```

@@ -91,7 +91,7 @@ def vectorization_main(model):
         corpus = Corpus(path=f"../../data/clean_corpus/corpus_{date}.json")
         corpus_dict = corpus.sentence_tranformer()
 
-        print("corpus length: " + len(corpus_dict))
+        print("corpus length: " + str(len(corpus_dict)))
         with open(f"../../data/embeddings/{model}_{date}.json", "w") as f:
             json.dump(corpus_dict, f, cls=NumpyArrayEncoder)
     print(f"finished vectorization for {model} on {date}")

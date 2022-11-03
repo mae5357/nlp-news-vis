@@ -78,7 +78,7 @@ def news_main():
 
     # save corpus
     save_corpus(corpus_dict)
-    print("Corpus saved: " + len(corpus_dict))
+    print("Corpus saved: " + str(len(corpus_dict)))
 
 
 if __name__ == "__main__":
