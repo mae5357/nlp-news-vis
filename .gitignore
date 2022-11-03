@@ -130,3 +130,6 @@ dmypy.json
 
 # data folder
 data/**
+
+# keep .gitkeep folders
+!.gitkeep
