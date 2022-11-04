@@ -127,4 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-data/news.csv
+
+# keep .gitkeep folders
+!.gitkeep
+
+# data folder
+data/clean_corpus/**
+data/raw_corpus/**
+data/embeddings/**
+
+.vscode/
