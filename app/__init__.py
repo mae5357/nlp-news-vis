@@ -37,6 +37,6 @@ def create_app(test_config=None):
     @app.route('/viz')
     def samples():
         # Update filename to pull file from /static/data/ for display (must be list of json/objects)
-        return send_from_directory(f'{app.static_folder}/data/', "newsdataio.nltk.doc2vec.pca.json")
+        return send_from_directory(f'{app.static_folder}/data/', "huffpost1000.nltk.doc2vec.pca.json")
 
     return app
