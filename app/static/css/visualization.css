@@ -1,0 +1,36 @@
+#container {
+    display: flex;
+    justify-content: center;
+}
+
+#data-spinner {
+    margin-top: 200px
+}
+
+.hidden {
+    display: none;
+}
+
+.dot {
+    stroke: gray;
+    stroke-width: 0.5;
+    opacity: 0.7;
+}
+
+#legend-container {
+    overflow-y: scroll;
+}
+
+.legend-text {
+    font-size: 10px;
+    text-transform: capitalize;
+}
+
+.legend-dot {
+    stroke: gray;
+    opacity: 0.2;
+}
+
+.focused {
+    opacity: 0.8;
+}

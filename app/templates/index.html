@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+  <link href="{{ url_for('static', filename='css/visualization.css') }}" rel="stylesheet">
+  <title>Team 120</title>
+</head>
+<body>
+<h1>Doc2Vec - PCA</h1>
+
+<div id="container">
+  <div id="data-spinner" class="spinner-border" role="status"></div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="{{ url_for('static', filename='js/visualization.js') }}"></script>
+</body>
+</html>
