@@ -21,9 +21,38 @@ const get_samples = () => {
 
         var data_view = [...data];
 
-        const categories = [...new Set(data.map(d => d['category']))]
-//        const categories = [...new Set(data.map(d => d['source']))]
         const colorPalette = ["#1b70fc", "#d50527", "#158940", "#f898fd", "#24c9d7", "#cb9b64", "#866888", "#22e67a", "#e509ae", "#9dabfa", "#437e8a", "#b21bff", "#ff7b91", "#94aa05", "#ac5906", "#82a68d", "#fe6616", "#7a7352", "#f9bc0f", "#b65d66", "#07a2e6", "#c091ae", "#8a91a7", "#88fc07", "#ea42fe", "#9e8010", "#10b437", "#c281fe", "#f92b75", "#07c99d", "#a946aa", "#bfd544", "#16977e", "#ff6ac8", "#a88178", "#5776a9", "#678007", "#fa9316", "#85c070", "#6aa2a9", "#989e5d", "#fe9169", "#cd714a", "#6ed014", "#c5639c", "#c23271", "#698ffc", "#678275", "#c5a121", "#a978ba", "#ee534e", "#d24506", "#59c3fa", "#ca7b0a", "#6f7385", "#9a634a", "#48aa6f", "#ad9ad0", "#d7908c", "#6a8a53", "#8c46fc", "#8f5ab8", "#fd1105", "#7ea7cf", "#d77cd1", "#a9804b", "#0688b4", "#6a9f3e", "#ee8fba", "#a67389", "#9e8cfe", "#bd443c", "#6d63ff", "#d110d5", "#798cc3", "#df5f83", "#b1b853", "#bb59d8", "#1d960c", "#867ba8", "#18acc9", "#25b3a7", "#f3db1d", "#938c6d", "#936a24", "#a964fb", "#92e460", "#a05787", "#9c87a0", "#20c773", "#8b696d", "#78762d", "#e154c6", "#40835f", "#d73656", "#1afd5c", "#c4f546", "#3d88d8", "#bd3896", "#1397a3", "#f940a5", "#66aeff", "#d097e7", "#fe6ef9", "#d86507", "#8b900a", "#d47270", "#e8ac48", "#cf7c97", "#cebb11", "#718a90", "#e78139", "#ff7463", "#bea1fd"];
+        const categories = [...new Set(data.map(d => d['category']))]
+        const sources = [...new Set(data.map(d => d['source']))]
+        const dates = [...new Set(data.map(d => d['date']))]
+//        const dates = [...new Set(data.map(d => d['date'].slice(0, 7)))]
+        const gradient  = data.map(d => d['description'].length)
+        const legendDimensions = {
+            "category": {
+                "values": categories,
+                "scale": d3.scaleOrdinal().range(colorPalette.slice(0, categories.length)).domain(categories),
+                "func": function(d) {return d["category"]}
+            },
+            "source": {
+                "values": sources,
+                "scale": d3.scaleOrdinal().range(colorPalette.slice(0, sources.length)).domain(sources),
+                "func": function(d) {return d["source"]}
+            },
+            "date": {
+                "values": dates,
+                "scale": d3.scaleOrdinal().range(colorPalette.slice(0, dates.length)).domain(dates),
+                "func": function(d) {return d["date"]}
+            },
+            "gradient": {
+                "values": gradient,
+                "scale": d3.scaleLinear().range(['#336077', '#c9cdd1', '#963e23']).domain([d3.max(gradient), d3.mean(gradient), d3.min(gradient)]),
+                "func": function(d) {
+                    return d['description'].length ? d['description'].length : 0
+                }
+            }
+        }
+
+        selectedLegendDimension = "category";
 
         var svg = d3.select("#container")
             .append("svg")
@@ -53,9 +82,9 @@ const get_samples = () => {
             .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`)
             .call(yAxis)
 
-        var colorScale = d3.scaleOrdinal()
-            .range(colorPalette.slice(0, categories.length))
-            .domain(categories);
+//        var colorScale = d3.scaleOrdinal()
+//            .range(colorPalette.slice(0, categories.length))
+//            .domain(categories);
 
 
         var scatterPlot = svg.append("g")
@@ -94,7 +123,8 @@ const get_samples = () => {
                 .text("Show/Hide All");
 
         var legendItem = legend.selectAll(".legend-item")
-            .data(categories)
+            .data(legendDimensions[selectedLegendDimension]["values"])
+//            .data(categories)
             .enter()
             .append("g")
             .attr("class", "legend-item")
@@ -102,12 +132,15 @@ const get_samples = () => {
                 .attr("class", "legend-dot focused")
                 .attr("r", 8)
                 .attr("cy", (d, i) => (i + 1) * 25)
-                .attr("fill", d => colorScale(d))
+                .attr("fill", d => legendDimensions[selectedLegendDimension]["scale"](d))
+//                .attr("fill", d => colorScale(d))
                 .on("click", function(e, d) {
-                    console.log(d);
-                    e.target.classList.toggle("focused");
+                    if (selectedLegendDimension !== "gradient") {
+                        console.log(d);
+                        e.target.classList.toggle("focused");
 
-                    updateDataView(e, d);
+                        updateDataView(e, d);
+                    }
                 });
 
         legend.selectAll(".legend-item")
@@ -151,14 +184,14 @@ const get_samples = () => {
         }
 
         function removeFromDataView(selection) {
-            focused_data = data_view.filter(article => article['category'] !== selection);
-//            focused_data = data_view.filter(article => article['source'] !== selection);
+            focused_data = data_view.filter(article => article[selectedLegendDimension] !== selection);
+//            focused_data = data_view.filter(article => article['category'] !== selection);
             return focused_data;
         }
 
         function addToDataView(selection) {
-            let focused_data = data.filter(article => article['category'] === selection);
-//            let focused_data = data.filter(article => article['source'] === selection);
+            let focused_data = data.filter(article => article[selectedLegendDimension] === selection);
+//            let focused_data = data.filter(article => article['category'] === selection);
             return [...data_view, ...focused_data];
         }
 
@@ -175,8 +208,10 @@ const get_samples = () => {
                     .attr("r", 6)
                     .attr("cx", d => xScale(d['coordinates'][0]))
                     .attr("cy", d => yScale(d['coordinates'][1]))
-                    .attr("fill", d => colorScale(d['category']))
-//                    .attr("fill", d => colorScale(d['source']))
+                    .attr("fill", function(d) {
+                        return legendDimensions[selectedLegendDimension]["scale"](legendDimensions[selectedLegendDimension]["func"](d))
+                    })
+//                    .attr("fill", d => colorScale(d['category']))
                     .on("click", function(e, d) {
 //                        console.log(Object.keys(d));
 //                        console.log(d['headline']);

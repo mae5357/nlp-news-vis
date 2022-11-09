@@ -1,11 +1,8 @@
 # start flask by running "flask --app app --debug run" from repo root
 
 import os
-import pprint
 
 from flask import Flask, render_template, jsonify, send_from_directory
-
-pp = pprint.PrettyPrinter()
 
 # boilerplate from the flask tuts
 def create_app(test_config=None):
