@@ -4,17 +4,18 @@ MARGIN = {TOP: 50, RIGHT: 150, BOTTOM: 50, LEFT: 150};
 INNER_WIDTH = OUTER_WIDTH - (MARGIN.LEFT + MARGIN.RIGHT);
 INNER_HEIGHT = OUTER_HEIGHT - (MARGIN.TOP + MARGIN.BOTTOM);
 
+DATA_PATH = "data/";
+DATA_FILE = "huffpost1000.nltk.doc2vec.pca.json";
+
 const toggleLoadingSpinner = () => {
     document.getElementById("data-spinner").classList.toggle("hidden");
 }
 
 const get_samples = () => {
-    let path = "/viz";
-    console.log(path);
 
-    fetch(path).then(res => {
+    d3.json(DATA_PATH + DATA_FILE).then(res => {
         console.log(res);
-        return res.json();
+        return res;
     }).then(data => {
         console.log(data);
         toggleLoadingSpinner();
