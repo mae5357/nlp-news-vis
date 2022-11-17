@@ -13,13 +13,22 @@ const toggleLoadingSpinner = () => {
 
 $("#dropdown-dataset a").click(function() {
     event.preventDefault();
-    selection = $(this).text();
-    proc_selections = DATA_FILE.split(".");
-    proc_selections[0] = selection;
-    DATA_FILE = proc_selections.join(".")
-    $("#dataset").children(":first").html(selection + '<span class="caret">')
-    get_samples()
+    set_selection("dataset", 0, $(this).text())
 })
+
+$("#dropdown-reducer a").click(function() {
+    event.preventDefault();
+    set_selection("vectorizer", 3, $(this).text())
+})
+
+const set_selection = (type, index, selection) => {
+    proc_selections = DATA_FILE.split(".");
+    proc_selections[index] = selection;
+    DATA_FILE = proc_selections.join(".")
+    $("#" + type).children(":first").html(selection + '<span class="caret">')
+    console.log(DATA_FILE)
+    get_samples()
+}
 
 const get_samples = () => {
 

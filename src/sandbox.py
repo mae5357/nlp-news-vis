@@ -1,7 +1,7 @@
 from ApiService import NewsIoApi, HuffPostApi
 from PreProcessor import NltkProcessor
 from Vectorizer import Doc2VecVectorizer
-from DimReducer import PCAReducer
+from DimReducer import PCAReducer, TsneReducer
 
 RAW_PATH = "../data/raw/"
 CLEAN_PATH = "../data/cleaned/"
