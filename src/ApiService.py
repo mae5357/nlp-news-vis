@@ -25,7 +25,7 @@ class ApiService(ABC):
 
     def save(self, path: str, articles):
         with open(path, "w") as f:
-            json.dump(articles, f)
+            json.dump(list(articles), f)
 
 
 class NewsApi(ApiService):
@@ -156,7 +156,8 @@ class NewsIoApi(ApiService):
         articles_content = []
         for article in articles:
             try:
-                if article.get('content') and len(article.get('content')) > len(article.get('description')):
+                # if article.get('content') and len(article.get('content')) > len(article.get('description')):
+                if article.get('content') and len(article.get('content')) > 1500:
                     articles_content.append(article)
             except Exception as e:
                 print(e)

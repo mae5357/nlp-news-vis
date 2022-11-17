@@ -1,6 +1,6 @@
 OUTER_WIDTH = 1200;
 OUTER_HEIGHT = 800;
-MARGIN = {TOP: 50, RIGHT: 150, BOTTOM: 50, LEFT: 150};
+MARGIN = {TOP: 100, RIGHT: 150, BOTTOM: 50, LEFT: 150};
 INNER_WIDTH = OUTER_WIDTH - (MARGIN.LEFT + MARGIN.RIGHT);
 INNER_HEIGHT = OUTER_HEIGHT - (MARGIN.TOP + MARGIN.BOTTOM);
 
@@ -11,13 +11,25 @@ const toggleLoadingSpinner = () => {
     document.getElementById("data-spinner").classList.toggle("hidden");
 }
 
+$("#dropdown-dataset a").click(function() {
+    event.preventDefault();
+    selection = $(this).text();
+    proc_selections = DATA_FILE.split(".");
+    proc_selections[0] = selection;
+    DATA_FILE = proc_selections.join(".")
+    $("#dataset").children(":first").html(selection + '<span class="caret">')
+    get_samples()
+})
+
 const get_samples = () => {
 
+    $("#chart-container").empty()
+
     d3.json(DATA_PATH + DATA_FILE).then(res => {
-        console.log(res);
+//        console.log(res);
         return res;
     }).then(data => {
-        console.log(data);
+//        console.log(data);
         toggleLoadingSpinner();
 
         var data_view = [...data];
@@ -55,7 +67,7 @@ const get_samples = () => {
 
         selectedLegendDimension = "category";
 
-        var svg = d3.select("#container")
+        var svg = d3.select("#chart-container")
             .append("svg")
             .attr("id", "svg")
             .attr("width", OUTER_WIDTH)
@@ -69,7 +81,7 @@ const get_samples = () => {
         var xAxisGroup = svg.append("g")
             .attr("id", "x-axis")
             .attr("class", "axis")
-            .attr("transform", `translate(${MARGIN.LEFT}, ${INNER_HEIGHT + MARGIN.BOTTOM})`)
+            .attr("transform", `translate(${MARGIN.LEFT}, ${INNER_HEIGHT + MARGIN.TOP})`)
             .call(xAxis)
 
         var yScale = d3.scaleLinear()
