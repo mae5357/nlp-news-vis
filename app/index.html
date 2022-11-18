@@ -53,6 +53,17 @@
             <li><a href="#">UMAP</a></li>
           </ul>
         </li>
+        <li role="presentation" class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Legend<span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu" id="dropdown-legend">
+            <li><a href="#">Category</a></li>
+            <li><a href="#">Source</a></li>
+            <li><a href="#">Date</a></li>
+            <li><a href="#">Gradient</a></li>
+          </ul>
+        </li>
       </ul>
     </div>
   </div>
@@ -62,7 +73,10 @@
 
   <div id="data-spinner" class="spinner-border" role="status"></div>
 
-  <div id="chart-container"></div>
+  <div id="chart-container">
+    <div id="plot-container"></div>
+    <div id="legend-container"></div>
+  </div>
 
 </div>
 

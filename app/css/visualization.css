@@ -5,7 +5,19 @@
 
 #chart-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    margin-top: 50px;
+}
+
+#plot-container {
+    width: 80%;
+}
+
+#legend-container {
+    width: 20%;
+    max-height: 500px;
+    margin-top: 20px;
+    overflow-y: auto;
 }
 
 #data-spinner {

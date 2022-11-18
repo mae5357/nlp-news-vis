@@ -32,7 +32,8 @@ const set_selection = (type, index, selection) => {
 
 const get_samples = () => {
 
-    $("#chart-container").empty()
+    $("#plot-container").empty()
+    $("#legend-container").empty()
 
     d3.json(DATA_PATH + DATA_FILE).then(res => {
 //        console.log(res);
@@ -48,7 +49,7 @@ const get_samples = () => {
         const sources = [...new Set(data.map(d => d['source']))]
         const dates = [...new Set(data.map(d => d['date']))]
 //        const dates = [...new Set(data.map(d => d['date'].slice(0, 7)))]
-        const gradient  = data.map(d => d['description'].length)
+        const gradient  = data.map(d => d['content'].length)
         const legendDimensions = {
             "category": {
                 "values": categories,
@@ -69,40 +70,53 @@ const get_samples = () => {
                 "values": gradient,
                 "scale": d3.scaleLinear().range(['#336077', '#c9cdd1', '#963e23']).domain([d3.max(gradient), d3.mean(gradient), d3.min(gradient)]),
                 "func": function(d) {
-                    return d['description'].length ? d['description'].length : 0
+                    return d['content'].length ? d['content'].length : 0
                 }
             }
         }
 
         selectedLegendDimension = "category";
 
-        var svg = d3.select("#chart-container")
+        $("#dropdown-legend a").click(function() {
+            event.preventDefault();
+            selectedLegendDimension = $(this).text().toLowerCase();
+            updateScatterPlot(data);
+            updateLegend(selectedLegendDimension);
+        })
+
+        var svg = d3.select("#plot-container")
             .append("svg")
             .attr("id", "svg")
-            .attr("width", OUTER_WIDTH)
-            .attr("height", OUTER_HEIGHT);
+            .attr("viewbox", "0 0 1000 1000")
+            .attr("width", "100%")
+            .attr("height", 800)
+//            .attr("transform", `translate(0, ${MARGIN.TOP})`);
 
         var xScale = d3.scaleLinear()
             .range([0, INNER_WIDTH])
-            .domain(d3.extent(data, d => d['coordinates'][0] + (d['coordinates'][0] * 0.25)));
-        var xAxis = d3.axisBottom()
-            .scale(xScale);
-        var xAxisGroup = svg.append("g")
-            .attr("id", "x-axis")
-            .attr("class", "axis")
-            .attr("transform", `translate(${MARGIN.LEFT}, ${INNER_HEIGHT + MARGIN.TOP})`)
-            .call(xAxis)
+            .domain(
+                [d3.min(data, d => d['coordinates'][0] - Math.abs(d['coordinates'][0] * 0.05)),
+                d3.max(data, d => d['coordinates'][0] + Math.abs(d['coordinates'][0] * 0.05))]);
+//        var xAxis = d3.axisBottom()
+//            .scale(xScale);
+//        var xAxisGroup = svg.append("g")
+//            .attr("id", "x-axis")
+//            .attr("class", "axis")
+//            .attr("transform", `translate(${MARGIN.LEFT}, ${INNER_HEIGHT + MARGIN.TOP})`)
+//            .call(xAxis)
 
         var yScale = d3.scaleLinear()
             .range([INNER_HEIGHT, 0])
-            .domain(d3.extent(data, d => d['coordinates'][1] + (d['coordinates'][1] * 0.25)));
-        var yAxis = d3.axisLeft()
-            .scale(yScale)
-        var yAxisGroup = svg.append("g")
-            .attr("id", "y-axis")
-            .attr("class", "axis")
-            .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`)
-            .call(yAxis)
+            .domain(
+                [d3.min(data, d => d['coordinates'][1] - Math.abs(d['coordinates'][1] * 0.05)),
+                d3.max(data, d => d['coordinates'][1] + Math.abs(d['coordinates'][1] * 0.05))]);
+//        var yAxis = d3.axisLeft()
+//            .scale(yScale)
+//        var yAxisGroup = svg.append("g")
+//            .attr("id", "y-axis")
+//            .attr("class", "axis")
+//            .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`)
+//            .call(yAxis)
 
 //        var colorScale = d3.scaleOrdinal()
 //            .range(colorPalette.slice(0, categories.length))
@@ -112,21 +126,18 @@ const get_samples = () => {
         var scatterPlot = svg.append("g")
             .attr("id", "scatter-plot")
             .attr("width", INNER_WIDTH)
-            .attr("height", INNER_HEIGHT)
-            .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`);
+            .attr("height", INNER_HEIGHT);
+//            .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`);
 
-        
-
-        // var legendContainer = svg.append("g")
-        //     .attr("id", "legend-container")
-        //     .attr("transform", `translate(${INNER_WIDTH + (MARGIN.LEFT / 2)}, ${MARGIN.TOP})`);
-
-        // var legend = legendContainer.append("g")
-        //     .attr("id", "legend");
-
-        var legend = svg.append("g")
+        var legend = d3.select("#legend-container").append("svg")
             .attr("id", "legend")
-            .attr("transform", `translate(${INNER_WIDTH + (MARGIN.LEFT / 2)}, ${MARGIN.TOP})`);
+            .attr("width", 200)
+            .attr("height", "1000")
+            .attr("transform", `translate(0, 10)`)
+            .append("g")
+                .attr("id", "legend-group-container")
+                .attr("height", "100%")
+                .attr("transform", `translate(10, 20)`);
         legend.append("g")
             .attr("id", "show-hide")
             .on("click", function(e, d) {
@@ -153,6 +164,7 @@ const get_samples = () => {
             .append("circle")
                 .attr("class", "legend-dot focused")
                 .attr("r", 8)
+                .attr("cx", 20)
                 .attr("cy", (d, i) => (i + 1) * 25)
                 .attr("fill", d => legendDimensions[selectedLegendDimension]["scale"](d))
 //                .attr("fill", d => colorScale(d))
@@ -170,7 +182,7 @@ const get_samples = () => {
             .text(d => d)
             .attr("alt", d => d)
             .attr("class", "legend-text")
-            .attr("x", 15)
+            .attr("x", 35)
             .attr("y", (d, i) => (i + 1) * 25)
             .style("alignment-baseline", "central");
 
@@ -178,6 +190,46 @@ const get_samples = () => {
 
 
         //// functions ////
+        function updateLegend(dimension) {
+            legend.selectAll(".legend-item").remove();
+
+            var legendUpdate = legend.selectAll(".legend-item")
+                .data(legendDimensions[selectedLegendDimension]["values"])
+
+            var legendEnter = legendUpdate
+                .enter()
+                .append("g")
+                .attr("class", "legend-item")
+                .append("circle")
+                    .attr("class", "legend-dot focused")
+                    .attr("r", 8)
+                    .attr("cy", (d, i) => (i + 1) * 25)
+                    .attr("fill", d => legendDimensions[selectedLegendDimension]["scale"](d))
+    //                .attr("fill", d => colorScale(d))
+                    .on("click", function(e, d) {
+                        if (selectedLegendDimension !== "gradient") {
+                            console.log(d);
+                            e.target.classList.toggle("focused");
+
+                            updateDataView(e, d);
+                        }
+                    });
+
+
+            legendUpdate.exit().remove();
+
+            legendEnter.merge(legendUpdate)
+
+            legend.selectAll(".legend-item")
+                        .append("text")
+                        .text(d => d)
+                        .attr("alt", d => d)
+                        .attr("class", "legend-text")
+                        .attr("x", 15)
+                        .attr("y", (d, i) => (i + 1) * 25)
+                        .style("alignment-baseline", "central");
+        }
+
         function updateDataView(event, selection) {
             target = event.target;
 

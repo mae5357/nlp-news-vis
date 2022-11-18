@@ -25,7 +25,7 @@ class ApiService(ABC):
 
     def save(self, path: str, articles):
         with open(path, "w") as f:
-            json.dump(list(articles), f)
+            json.dump(articles, f)
 
 
 class NewsApi(ApiService):
