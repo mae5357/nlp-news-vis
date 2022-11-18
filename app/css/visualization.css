@@ -3,10 +3,14 @@
     padding-left: 50px;
 }
 
+.container {
+    min-width: 1300px;
+}
+
 #chart-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 50px;
+    margin-top: 100px;
 }
 
 #plot-container {
