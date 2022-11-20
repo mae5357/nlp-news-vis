@@ -192,7 +192,7 @@ class HuffPostApi(ApiService):
                     "description": article.get("short_description") or None,
                     "content": f'{article.get("headline")} {article.get("short_description")}',
                     "date": article.get("date") or None,
-                    "source": None,
+                    "source": "HuffPost",
                     "category": article.get("category") or None,
                     "authors": article.get("authors") or None,
                     "vectors": None,

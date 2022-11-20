@@ -1,102 +1,176 @@
+// margin convention, though bootstrap/css is handling most of this now
 OUTER_WIDTH = 1200;
 OUTER_HEIGHT = 800;
 MARGIN = {TOP: 100, RIGHT: 150, BOTTOM: 50, LEFT: 150};
 INNER_WIDTH = OUTER_WIDTH - (MARGIN.LEFT + MARGIN.RIGHT);
 INNER_HEIGHT = OUTER_HEIGHT - (MARGIN.TOP + MARGIN.BOTTOM);
 
+// since we're serving data from a stati, preprocessed file
+// just splitting the filename on "." and recomposing based on
+// dropdown selections to locate/display
 DATA_PATH = "data/";
 DATA_FILE = "huffpost1000.nltk.doc2vec.pca.json";
 
+// this isn't necessary with static files, but saving for posterity
 const toggleLoadingSpinner = () => {
     document.getElementById("data-spinner").classList.toggle("hidden");
-}
+};
 
+// dataset selector
 $("#dropdown-dataset a").click(function() {
     event.preventDefault();
-    set_selection("dataset", 0, $(this).text())
-})
+    set_selection("dataset", 0, $(this).text());
+});
 
+// vectorizer selector
+$("#dropdown-vectorizer a").click(function() {
+    event.preventDefault();
+    set_selection("vectorizer", 2, $(this).text());
+});
+
+// reducer selector
 $("#dropdown-reducer a").click(function() {
     event.preventDefault();
-    set_selection("vectorizer", 3, $(this).text())
-})
+    set_selection("reducer", 3, $(this).text());
+});
 
+// determine new file name and reload viz
 const set_selection = (type, index, selection) => {
     proc_selections = DATA_FILE.split(".");
     proc_selections[index] = selection;
-    DATA_FILE = proc_selections.join(".")
-    $("#" + type).children(":first").html(selection + '<span class="caret">')
-    console.log(DATA_FILE)
-    get_samples()
+    DATA_FILE = proc_selections.join(".");
+    $("#" + type).children(":first").html(selection + '<span class="caret">');
+    $("#legend-menu").children(":first").html("Legend" + '<span class="caret">');
+    get_samples();
 }
 
+// main function to load file and render everything
 const get_samples = () => {
 
+    // currently just wiping everything before recreating
+    // though really this could be a more elegant d3 update somehow
     $("#plot-container").empty()
     $("#legend-container").empty()
 
     d3.json(DATA_PATH + DATA_FILE).then(res => {
-//        console.log(res);
         return res;
     }).then(data => {
-//        console.log(data);
         toggleLoadingSpinner();
 
+        // creating a copy of data to be used for display (based on legend selection)
+        // without touching raw data
         var data_view = [...data];
 
-        const colorPalette = ["#1b70fc", "#d50527", "#158940", "#f898fd", "#24c9d7", "#cb9b64", "#866888", "#22e67a", "#e509ae", "#9dabfa", "#437e8a", "#b21bff", "#ff7b91", "#94aa05", "#ac5906", "#82a68d", "#fe6616", "#7a7352", "#f9bc0f", "#b65d66", "#07a2e6", "#c091ae", "#8a91a7", "#88fc07", "#ea42fe", "#9e8010", "#10b437", "#c281fe", "#f92b75", "#07c99d", "#a946aa", "#bfd544", "#16977e", "#ff6ac8", "#a88178", "#5776a9", "#678007", "#fa9316", "#85c070", "#6aa2a9", "#989e5d", "#fe9169", "#cd714a", "#6ed014", "#c5639c", "#c23271", "#698ffc", "#678275", "#c5a121", "#a978ba", "#ee534e", "#d24506", "#59c3fa", "#ca7b0a", "#6f7385", "#9a634a", "#48aa6f", "#ad9ad0", "#d7908c", "#6a8a53", "#8c46fc", "#8f5ab8", "#fd1105", "#7ea7cf", "#d77cd1", "#a9804b", "#0688b4", "#6a9f3e", "#ee8fba", "#a67389", "#9e8cfe", "#bd443c", "#6d63ff", "#d110d5", "#798cc3", "#df5f83", "#b1b853", "#bb59d8", "#1d960c", "#867ba8", "#18acc9", "#25b3a7", "#f3db1d", "#938c6d", "#936a24", "#a964fb", "#92e460", "#a05787", "#9c87a0", "#20c773", "#8b696d", "#78762d", "#e154c6", "#40835f", "#d73656", "#1afd5c", "#c4f546", "#3d88d8", "#bd3896", "#1397a3", "#f940a5", "#66aeff", "#d097e7", "#fe6ef9", "#d86507", "#8b900a", "#d47270", "#e8ac48", "#cf7c97", "#cebb11", "#718a90", "#e78139", "#ff7463", "#bea1fd"];
-        const categories = [...new Set(data.map(d => d['category']))]
-        const sources = [...new Set(data.map(d => d['source']))]
-        const dates = [...new Set(data.map(d => d['date']))]
-//        const dates = [...new Set(data.map(d => d['date'].slice(0, 7)))]
-        const gradient  = data.map(d => d['content'].length)
+        // attempt at creating color customization
+        // (color palettes are just a big pool of colors for some scales to choose from)
+        // grab the various data/dimensions that could be used as color scales
+        // create color scales based on those buckets/labels/classifications
+        const catPalette = ["#1b70fc", "#d50527", "#158940", "#f898fd", "#24c9d7", "#cb9b64", "#866888", "#22e67a", "#e509ae", "#9dabfa", "#437e8a", "#b21bff", "#ff7b91", "#94aa05", "#ac5906", "#82a68d", "#fe6616", "#7a7352", "#f9bc0f", "#b65d66", "#07a2e6", "#c091ae", "#8a91a7", "#88fc07", "#ea42fe", "#9e8010", "#10b437", "#c281fe", "#f92b75", "#07c99d", "#a946aa", "#bfd544", "#16977e", "#ff6ac8", "#a88178", "#5776a9", "#678007", "#fa9316", "#85c070", "#6aa2a9", "#989e5d", "#fe9169", "#cd714a", "#6ed014", "#c5639c", "#c23271", "#698ffc", "#678275", "#c5a121", "#a978ba", "#ee534e", "#d24506", "#59c3fa", "#ca7b0a", "#6f7385", "#9a634a", "#48aa6f", "#ad9ad0", "#d7908c", "#6a8a53", "#8c46fc", "#8f5ab8", "#fd1105", "#7ea7cf", "#d77cd1", "#a9804b", "#0688b4", "#6a9f3e", "#ee8fba", "#a67389", "#9e8cfe", "#bd443c", "#6d63ff", "#d110d5", "#798cc3", "#df5f83", "#b1b853", "#bb59d8", "#1d960c", "#867ba8", "#18acc9", "#25b3a7", "#f3db1d", "#938c6d", "#936a24", "#a964fb", "#92e460", "#a05787", "#9c87a0", "#20c773", "#8b696d", "#78762d", "#e154c6", "#40835f", "#d73656", "#1afd5c", "#c4f546", "#3d88d8", "#bd3896", "#1397a3", "#f940a5", "#66aeff", "#d097e7", "#fe6ef9", "#d86507", "#8b900a", "#d47270", "#e8ac48", "#cf7c97", "#cebb11", "#718a90", "#e78139", "#ff7463", "#bea1fd"];
+        const sourcePalette = catPalette.slice(10);
+
+        const categories = [...new Set(data.map(d => d['category']))];
+        const categoryScale = d3.scaleOrdinal().range(catPalette.slice(0, categories.length)).domain(categories);
+
+        const sources = [...new Set(data.map(d => d['source']))];
+        const sourceScale = d3.scaleOrdinal().range(sourcePalette.slice(0, sources.length)).domain(sources);
+
+        const dates = [...new Set(data.map(d => d['date']))];
+        const dateScale = d3.scaleOrdinal().range(catPalette.slice(0, dates.length)).domain(dates);
+
+        // this is an example gradient/quantile-based coloring.  right now it is using
+        // the length of the cleaned tokens list (content) from the vectorizer
+        const gradients  = data.map(d => d['content'].length);
+        const gradientScale = d3.scaleQuantile().range(['#649ac7', '#78b1cd', '#a7c4d1', '#d3d3d3', '#d0b5a4', '#cc9471', '#cb703b']).domain(gradients);
+        const gradientQuantiles = gradientScale.quantiles().map(q => Math.round(q));
+        // prepend/append min and max to intermediary threholds
+        gradientQuantiles.unshift(d3.min(gradients));
+        gradientQuantiles.push(d3.max(gradients));
+        // this is just to create the "x - y" labels
+        quantileRanges = [];
+        for (let i = 1; i < gradientQuantiles.length; i++) {
+            quantileRanges.push(`${gradientQuantiles[i - 1]} - ${gradientQuantiles[i]}`);
+        }
+
+        // this can probably be vastly improved
+        // allows the legend and plot coloring to operate on generalized
+        // "selectedDimension" almost like classes of an interface to return
+        // its versions of values/labels/colors
         const legendDimensions = {
             "category": {
                 "values": categories,
-                "scale": d3.scaleOrdinal().range(colorPalette.slice(0, categories.length)).domain(categories),
-                "func": function(d) {return d["category"]}
+                "getLegendLabel": function(d) {return d},
+                "getLabel": function(d) {return d["category"];},
+                "getLegendColor": function(d) {return categoryScale(d);},
+                "getDotColor": function(d) {return categoryScale(d["category"]);}
             },
             "source": {
                 "values": sources,
-                "scale": d3.scaleOrdinal().range(colorPalette.slice(0, sources.length)).domain(sources),
-                "func": function(d) {return d["source"]}
+                "getLabel": function(d) {return d["source"];},
+                "getLegendLabel": function(d) {return d;},
+                "getLegendColor": function(d) {return sourceScale(d);},
+                "getDotColor": function(d) {return sourceScale(d["source"]);}
             },
             "date": {
-                "values": dates,
-                "scale": d3.scaleOrdinal().range(colorPalette.slice(0, dates.length)).domain(dates),
-                "func": function(d) {return d["date"]}
+                "values": [...new Set(dates.map(d => d.slice(0, 7)))],
+                "getLabel": function(d) {return d['date'].slice(0, 7);},
+                "getLegendLabel": function(d) {return d;},
+                "getLegendColor": function(d) {return dateScale(d.slice(0, 7));},
+                "getDotColor": function(d) {return dateScale(d["date"].slice(0, 7));}
             },
             "gradient": {
-                "values": gradient,
-                "scale": d3.scaleLinear().range(['#336077', '#c9cdd1', '#963e23']).domain([d3.max(gradient), d3.mean(gradient), d3.min(gradient)]),
-                "func": function(d) {
-                    return d['content'].length ? d['content'].length : 0
+                "values": gradientQuantiles.slice(0, -1),
+                "getLabel": function(d) {
+                    value = d["content"] ? d["content"].length : 0;
+                    for (let i = 0; i < gradientQuantiles.length; i++) {
+                        if (value < gradientQuantiles[i])
+                            return gradientQuantiles[i - 1];
+                    }
+                },
+                "getLegendLabel": function(d) {
+                    for (let i = 0; i < gradientQuantiles.length; i++) {
+                      if (d < gradientQuantiles[i])
+                          return `${gradientQuantiles[i - 1]} - ${gradientQuantiles[i]}`;
+                    }
+                },
+                "getLegendColor": function(d) {
+                    return gradientScale(d);
+                },
+                "getDotColor": function(d) {
+                    return gradientScale(d["content"] ? d["content"].length : 0);
                 }
             }
-        }
+        };
 
+        // default to "category" and this will be updated via dropdown of above map options
         selectedLegendDimension = "category";
 
-        $("#dropdown-legend a").click(function() {
-            event.preventDefault();
-            selectedLegendDimension = $(this).text().toLowerCase();
-            updateScatterPlot(data);
-            updateLegend(selectedLegendDimension);
-        })
-
+        // create scatterplot and container
         var svg = d3.select("#plot-container")
             .append("svg")
             .attr("id", "svg")
             .attr("viewbox", "0 0 1000 1000")
             .attr("width", "100%")
             .attr("height", 800)
-//            .attr("transform", `translate(0, ${MARGIN.TOP})`);
 
+        var scatterPlot = svg.append("g")
+            .attr("id", "scatter-plot")
+            .attr("width", INNER_WIDTH)
+            .attr("height", INNER_HEIGHT);
+
+        // scales based on min/max data with 5% buffer (so dots not clipped)
         var xScale = d3.scaleLinear()
             .range([0, INNER_WIDTH])
             .domain(
                 [d3.min(data, d => d['coordinates'][0] - Math.abs(d['coordinates'][0] * 0.05)),
                 d3.max(data, d => d['coordinates'][0] + Math.abs(d['coordinates'][0] * 0.05))]);
+
+        var yScale = d3.scaleLinear()
+            .range([INNER_HEIGHT, 0])
+            .domain(
+                [d3.min(data, d => d['coordinates'][1] - Math.abs(d['coordinates'][1] * 0.05)),
+                d3.max(data, d => d['coordinates'][1] + Math.abs(d['coordinates'][1] * 0.05))]);
+
+//        the axes don't add any value at the moment, but keeping for posterity
 //        var xAxis = d3.axisBottom()
 //            .scale(xScale);
 //        var xAxisGroup = svg.append("g")
@@ -104,12 +178,6 @@ const get_samples = () => {
 //            .attr("class", "axis")
 //            .attr("transform", `translate(${MARGIN.LEFT}, ${INNER_HEIGHT + MARGIN.TOP})`)
 //            .call(xAxis)
-
-        var yScale = d3.scaleLinear()
-            .range([INNER_HEIGHT, 0])
-            .domain(
-                [d3.min(data, d => d['coordinates'][1] - Math.abs(d['coordinates'][1] * 0.05)),
-                d3.max(data, d => d['coordinates'][1] + Math.abs(d['coordinates'][1] * 0.05))]);
 //        var yAxis = d3.axisLeft()
 //            .scale(yScale)
 //        var yAxisGroup = svg.append("g")
@@ -118,17 +186,10 @@ const get_samples = () => {
 //            .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`)
 //            .call(yAxis)
 
-//        var colorScale = d3.scaleOrdinal()
-//            .range(colorPalette.slice(0, categories.length))
-//            .domain(categories);
 
-
-        var scatterPlot = svg.append("g")
-            .attr("id", "scatter-plot")
-            .attr("width", INNER_WIDTH)
-            .attr("height", INNER_HEIGHT);
-//            .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`);
-
+        // create legend with dots and labels using selectedDimension mapping
+        // currently there is duplicate code that could be moved to an update method
+        // like the "updateScatterPlot"
         var legend = d3.select("#legend-container").append("svg")
             .attr("id", "legend")
             .attr("width", 200)
@@ -138,26 +199,15 @@ const get_samples = () => {
                 .attr("id", "legend-group-container")
                 .attr("height", "100%")
                 .attr("transform", `translate(10, 20)`);
+
         legend.append("g")
             .attr("id", "show-hide")
-            .on("click", function(e, d) {
-                let circles = legend.selectAll("circle");
-                if (circles.classed("focused")) {
-                    circles.classed("focused", false);
-                    data_view = [];
-                }
-                else {
-                    circles.classed("focused", true);
-                    data_view = [...data];
-                }
-                updateScatterPlot(data_view);
-            })
+            .on("click", showHideFilter)
             .append("text")
                 .text("Show/Hide All");
 
         var legendItem = legend.selectAll(".legend-item")
             .data(legendDimensions[selectedLegendDimension]["values"])
-//            .data(categories)
             .enter()
             .append("g")
             .attr("class", "legend-item")
@@ -166,30 +216,53 @@ const get_samples = () => {
                 .attr("r", 8)
                 .attr("cx", 20)
                 .attr("cy", (d, i) => (i + 1) * 25)
-                .attr("fill", d => legendDimensions[selectedLegendDimension]["scale"](d))
-//                .attr("fill", d => colorScale(d))
+                .attr("fill", d => legendDimensions[selectedLegendDimension]["getLegendColor"](d))
                 .on("click", function(e, d) {
-                    if (selectedLegendDimension !== "gradient") {
-                        console.log(d);
-                        e.target.classList.toggle("focused");
+                    console.log(d);
+                    e.target.classList.toggle("focused");
 
-                        updateDataView(e, d);
-                    }
+                    updateDataView(e, d);
                 });
 
         legend.selectAll(".legend-item")
             .append("text")
-            .text(d => d)
+            .text(d => legendDimensions[selectedLegendDimension]["getLegendLabel"](d))
             .attr("alt", d => d)
             .attr("class", "legend-text")
             .attr("x", 35)
             .attr("y", (d, i) => (i + 1) * 25)
             .style("alignment-baseline", "central");
 
+            // when Legend dropdown is updated, update legend colors
+            // put here for now to make calls to functions defined in this block
+            $("#dropdown-legend a").click(function() {
+                event.preventDefault();
+                selectedLegendDimension = $(this).text().toLowerCase();
+                $("#legend-menu").children(":first").html(selectedLegendDimension + '<span class="caret">');
+                data_view = [...data];
+                updateScatterPlot(data);
+                updateLegend(selectedLegendDimension);
+            });
+
+            // init call to render plot
             updateScatterPlot(data);
 
 
+
         //// functions ////
+        function showHideFilter() {
+            let circles = legend.selectAll("circle");
+            if (circles.classed("focused")) {
+                circles.classed("focused", false);
+                data_view = [];
+            }
+            else {
+                circles.classed("focused", true);
+                data_view = [...data];
+            }
+            updateScatterPlot(data_view);
+        }
+
         function updateLegend(dimension) {
             legend.selectAll(".legend-item").remove();
 
@@ -204,15 +277,12 @@ const get_samples = () => {
                     .attr("class", "legend-dot focused")
                     .attr("r", 8)
                     .attr("cy", (d, i) => (i + 1) * 25)
-                    .attr("fill", d => legendDimensions[selectedLegendDimension]["scale"](d))
-    //                .attr("fill", d => colorScale(d))
+                    .attr("fill", d => legendDimensions[selectedLegendDimension]["getLegendColor"](d))
                     .on("click", function(e, d) {
-                        if (selectedLegendDimension !== "gradient") {
-                            console.log(d);
-                            e.target.classList.toggle("focused");
+                        console.log(d);
+                        e.target.classList.toggle("focused");
 
-                            updateDataView(e, d);
-                        }
+                        updateDataView(e, d);
                     });
 
 
@@ -222,7 +292,7 @@ const get_samples = () => {
 
             legend.selectAll(".legend-item")
                         .append("text")
-                        .text(d => d)
+                        .text(d => legendDimensions[selectedLegendDimension]["getLegendLabel"](d))
                         .attr("alt", d => d)
                         .attr("class", "legend-text")
                         .attr("x", 15)
@@ -258,14 +328,16 @@ const get_samples = () => {
         }
 
         function removeFromDataView(selection) {
-            focused_data = data_view.filter(article => article[selectedLegendDimension] !== selection);
-//            focused_data = data_view.filter(article => article['category'] !== selection);
+            focused_data = data_view.filter(article => {
+                return legendDimensions[selectedLegendDimension]["getLabel"](article) !== selection;
+            });
             return focused_data;
         }
 
         function addToDataView(selection) {
-            let focused_data = data.filter(article => article[selectedLegendDimension] === selection);
-//            let focused_data = data.filter(article => article['category'] === selection);
+            let focused_data = data.filter(article => {
+                return legendDimensions[selectedLegendDimension]["getLabel"](article) === selection;
+            });
             return [...data_view, ...focused_data];
         }
 
@@ -283,15 +355,14 @@ const get_samples = () => {
                     .attr("cx", d => xScale(d['coordinates'][0]))
                     .attr("cy", d => yScale(d['coordinates'][1]))
                     .attr("fill", function(d) {
-                        return legendDimensions[selectedLegendDimension]["scale"](legendDimensions[selectedLegendDimension]["func"](d))
+                        return legendDimensions[selectedLegendDimension]["getDotColor"](d);
                     })
-//                    .attr("fill", d => colorScale(d['category']))
                     .on("click", function(e, d) {
-//                        console.log(Object.keys(d));
-//                        console.log(d['headline']);
-//                        console.log(d['short_description']);
+                        console.log(d['category']);
+                        console.log(d['source']);
                         console.log(d['title']);
                         console.log(d['description']);
+                        console.log(d['date']);
                     });
 
             scatterPlotUpdate.exit().remove();

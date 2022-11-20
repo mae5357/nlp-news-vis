@@ -4,13 +4,14 @@
 }
 
 .container {
-    min-width: 1300px;
+    /*min-width: 1300px;*/
 }
 
 #chart-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 100px;
+    margin-top: 150px;
+    min-width: 1200px;
 }
 
 #plot-container {
@@ -43,7 +44,11 @@
 }
 
 .legend-text {
-    font-size: 10px;
+    font-size: 14px;
+    text-transform: capitalize;
+}
+
+#legend-menu>a {
     text-transform: capitalize;
 }
 
