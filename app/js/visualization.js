@@ -148,14 +148,23 @@ const get_samples = () => {
         var svg = d3.select("#plot-container")
             .append("svg")
             .attr("id", "svg")
-            .attr("viewbox", "0 0 1000 1000")
+//            .attr("viewbox", "0 0 1000 1000")
             .attr("width", "100%")
-            .attr("height", 800)
+            .attr("height", "100%")
 
         var scatterPlot = svg.append("g")
             .attr("id", "scatter-plot")
             .attr("width", INNER_WIDTH)
             .attr("height", INNER_HEIGHT);
+
+        // zoom and pan. initial zoom call and then use zoom translate so all
+        // future zooms are relative
+        var zoom = d3.zoom()
+            .on("zoom", function(e) {
+                scatterPlot.attr("transform", e.transform)
+            });
+        svg.call(zoom);
+        svg.call(zoom.transform, d3.zoomIdentity.translate(0, 100).scale(1));
 
         // scales based on min/max data with 5% buffer (so dots not clipped)
         var xScale = d3.scaleLinear()
