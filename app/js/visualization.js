@@ -16,6 +16,11 @@ const toggleLoadingSpinner = () => {
     document.getElementById("data-spinner").classList.toggle("hidden");
 };
 
+$("#plot-container").click(function() {
+    if ("tooltip" != $(this).attr("id"))
+        $("#tooltip").css("visibility", "hidden");
+});
+
 // dataset selector
 $("#dropdown-dataset a").click(function() {
     event.preventDefault();
@@ -77,18 +82,18 @@ const get_samples = () => {
         const dates = [...new Set(data.map(d => d['date']))];
         const dateScale = d3.scaleOrdinal().range(catPalette.slice(0, dates.length)).domain(dates);
 
-        // this is an example gradient/quantile-based coloring.  right now it is using
+        // this is an example gradient/quantile-based coloring. right now it is using
         // the length of the cleaned tokens list (content) from the vectorizer
-        const gradients  = data.map(d => d['content'].length);
-        const gradientScale = d3.scaleQuantile().range(['#649ac7', '#78b1cd', '#a7c4d1', '#d3d3d3', '#d0b5a4', '#cc9471', '#cb703b']).domain(gradients);
-        const gradientQuantiles = gradientScale.quantiles().map(q => Math.round(q));
-        // prepend/append min and max to intermediary threholds
-        gradientQuantiles.unshift(d3.min(gradients));
-        gradientQuantiles.push(d3.max(gradients));
+        const lengths  = data.map(d => d['content'].length);
+        const lengthsScale = d3.scaleQuantile().range(['#649ac7', '#78b1cd', '#a7c4d1', '#d3d3d3', '#d0b5a4', '#cc9471', '#cb703b']).domain(lengths);
+        const lengthsQuantiles = lengthsScale.quantiles().map(q => Math.round(q));
+        // prepend/append min and max to intermediary thresholds
+        lengthsQuantiles.unshift(d3.min(lengths));
+        lengthsQuantiles.push(d3.max(lengths));
         // this is just to create the "x - y" labels
         quantileRanges = [];
-        for (let i = 1; i < gradientQuantiles.length; i++) {
-            quantileRanges.push(`${gradientQuantiles[i - 1]} - ${gradientQuantiles[i]}`);
+        for (let i = 1; i < lengthsQuantiles.length; i++) {
+            quantileRanges.push(`${lengthsQuantiles[i - 1]} - ${lengthsQuantiles[i]}`);
         }
 
         // this can probably be vastly improved
@@ -117,26 +122,26 @@ const get_samples = () => {
                 "getLegendColor": function(d) {return dateScale(d.slice(0, 7));},
                 "getDotColor": function(d) {return dateScale(d["date"].slice(0, 7));}
             },
-            "gradient": {
-                "values": gradientQuantiles.slice(0, -1),
+            "length": {
+                "values": lengthsQuantiles.slice(0, -1),
                 "getLabel": function(d) {
                     value = d["content"] ? d["content"].length : 0;
-                    for (let i = 0; i < gradientQuantiles.length; i++) {
-                        if (value < gradientQuantiles[i])
-                            return gradientQuantiles[i - 1];
+                    for (let i = 0; i < lengthsQuantiles.length; i++) {
+                        if (value < lengthsQuantiles[i])
+                            return lengthsQuantiles[i - 1];
                     }
                 },
                 "getLegendLabel": function(d) {
-                    for (let i = 0; i < gradientQuantiles.length; i++) {
-                      if (d < gradientQuantiles[i])
-                          return `${gradientQuantiles[i - 1]} - ${gradientQuantiles[i]}`;
+                    for (let i = 0; i < lengthsQuantiles.length; i++) {
+                      if (d < lengthsQuantiles[i])
+                          return `${lengthsQuantiles[i - 1]} - ${lengthsQuantiles[i]}`;
                     }
                 },
                 "getLegendColor": function(d) {
-                    return gradientScale(d);
+                    return lengthsScale(d);
                 },
                 "getDotColor": function(d) {
-                    return gradientScale(d["content"] ? d["content"].length : 0);
+                    return lengthsScale(d["content"] ? d["content"].length : 0);
                 }
             }
         };
@@ -160,6 +165,7 @@ const get_samples = () => {
         // zoom and pan. initial zoom call and then use zoom translate so all
         // future zooms are relative
         var zoom = d3.zoom()
+            .scaleExtent([1, 8])
             .on("zoom", function(e) {
                 scatterPlot.attr("transform", e.transform)
             });
@@ -196,6 +202,20 @@ const get_samples = () => {
 //            .call(yAxis)
 
 
+        var tooltip = d3.select("#plot-container")
+              .append("div")
+              .attr("class", "tooltip")
+              .attr("id", "tooltip")
+              .style("visibility", "hidden")
+              .style("max-width", "200px")
+              .style("opacity", 1)
+              .style("background-color", "white")
+              .style("border", "solid")
+              .style("border-width", "2px")
+              .style("border-radius", "5px")
+              .style("padding", "5px");
+
+
         // create legend with dots and labels using selectedDimension mapping
         // currently there is duplicate code that could be moved to an update method
         // like the "updateScatterPlot"
@@ -203,7 +223,7 @@ const get_samples = () => {
             .attr("id", "legend")
             .attr("width", 200)
             .attr("height", "1000")
-            .attr("transform", `translate(0, 10)`)
+            .attr("transform", `translate(10, 10)`)
             .append("g")
                 .attr("id", "legend-group-container")
                 .attr("height", "100%")
@@ -367,11 +387,20 @@ const get_samples = () => {
                         return legendDimensions[selectedLegendDimension]["getDotColor"](d);
                     })
                     .on("click", function(e, d) {
-                        console.log(d['category']);
-                        console.log(d['source']);
-                        console.log(d['title']);
-                        console.log(d['description']);
-                        console.log(d['date']);
+                        e.stopPropagation();
+                        tooltip.style("visibility", "visible")
+                            .style("left", `${e.pageX + 15}px`)
+                            .style("top", `${e.pageY}px`)
+                            .html(
+                                `<div>
+                                    Category: ${d['category']}<br/>
+                                    Source: ${d['source']}<br/>
+                                    <p>Date: ${d['date']}</p>
+                                    <p>Title: ${d['title']}</p>
+                                    <p>Description:
+                                      ${d['description']}</p>
+                                </div>`
+                            )
                     });
 
             scatterPlotUpdate.exit().remove();
