@@ -1,7 +1,7 @@
 from ApiService import NewsIoApi, HuffPostApi
 from PreProcessor import NltkProcessor
-from Vectorizer import Doc2VecVectorizer
-from DimReducer import PCAReducer, TsneReducer
+from Vectorizer import Doc2VecVectorizer, BertVectorizer
+from DimReducer import PCAReducer, TsneReducer, UmapReducer
 
 RAW_PATH = "../data/raw/"
 CLEAN_PATH = "../data/cleaned/"
@@ -39,5 +39,5 @@ if __name__ == "__main__":
     corpus_coordinates = dr.dimreduce(vectors)
     for link, coord in corpus_coordinates.items():
         cleaned_corpus[link]["coordinates"] = coord
-    api.save(RED_PATH + "huffpost1000.nltk.doc2vec.pca.json", cleaned_corpus.values())
+    api.save(RED_PATH + "huffpost1000.nltk.doc2vec.pca.json", list(cleaned_corpus.values()))
 

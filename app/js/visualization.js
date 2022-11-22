@@ -43,6 +43,12 @@ $("#dropdown-reducer a").click(function() {
 const set_selection = (type, index, selection) => {
     proc_selections = DATA_FILE.split(".");
     proc_selections[index] = selection;
+    if (index === 2) {
+        if ("bert" === selection.toLowerCase())
+            proc_selections[1] = "none";
+        else
+            proc_selections[1] = "nltk";
+    }
     DATA_FILE = proc_selections.join(".");
     $("#" + type).children(":first").html(selection + '<span class="caret">');
     $("#legend-menu").children(":first").html("Legend" + '<span class="caret">');
@@ -167,7 +173,10 @@ const get_samples = () => {
         var zoom = d3.zoom()
             .scaleExtent([1, 8])
             .on("zoom", function(e) {
-                scatterPlot.attr("transform", e.transform)
+                currentScale = e.transform.k // hack to access current scale from outside
+                scatterPlot.attr("transform", e.transform);
+                scatterPlot.selectAll(".dot").attr("r", 6 / currentScale);
+//                scatterPlot.selectAll(".dot").attr("r", 6 / (1 + Math.log(currentScale) * 2));
             });
         svg.call(zoom);
         svg.call(zoom.transform, d3.zoomIdentity.translate(0, 100).scale(1));
@@ -247,7 +256,6 @@ const get_samples = () => {
                 .attr("cy", (d, i) => (i + 1) * 25)
                 .attr("fill", d => legendDimensions[selectedLegendDimension]["getLegendColor"](d))
                 .on("click", function(e, d) {
-                    console.log(d);
                     e.target.classList.toggle("focused");
 
                     updateDataView(e, d);
@@ -308,7 +316,6 @@ const get_samples = () => {
                     .attr("cy", (d, i) => (i + 1) * 25)
                     .attr("fill", d => legendDimensions[selectedLegendDimension]["getLegendColor"](d))
                     .on("click", function(e, d) {
-                        console.log(d);
                         e.target.classList.toggle("focused");
 
                         updateDataView(e, d);
@@ -380,7 +387,7 @@ const get_samples = () => {
                 .append("circle")
                     .attr("id", `dot-${(d, i) => i}`)
                     .attr("class", "dot")
-                    .attr("r", 6)
+                    .attr("r", 6 / currentScale)
                     .attr("cx", d => xScale(d['coordinates'][0]))
                     .attr("cy", d => yScale(d['coordinates'][1]))
                     .attr("fill", function(d) {

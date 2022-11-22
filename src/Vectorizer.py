@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from gensim.models import Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
+from sentence_transformers import SentenceTransformer
 
 
 class Vectorizer(ABC):
@@ -9,6 +10,14 @@ class Vectorizer(ABC):
     @abstractmethod
     def vectorize(self, corpus: dict):
         pass
+
+    def get_tagged_corpus(self, corpus):
+        tagged_corpus = []
+
+        for link, doc in corpus.items():
+            tagged_corpus.append(TaggedDocument(words=doc["content"], tags=link))
+
+        return tagged_corpus
 
 
 class Doc2VecVectorizer(Vectorizer):
@@ -35,10 +44,13 @@ class Doc2VecVectorizer(Vectorizer):
         return {doc.tags: model.infer_vector(doc.words).tolist() for doc in tagged_corpus}
 
 
-    def get_tagged_corpus(self, corpus):
-        tagged_corpus = []
+class BertVectorizer(Vectorizer):
 
-        for link, doc in corpus.items():
-            tagged_corpus.append(TaggedDocument(words=doc["content"], tags=link))
+    def __init__(self, model_type="sentence-transformers/all-mpnet-base-v2"):
+        self.model_type = model_type
 
-        return tagged_corpus
+    def vectorize(self, corpus: dict):
+        tagged_corpus = self.get_tagged_corpus(corpus)
+
+        model = SentenceTransformer(self.model_type)
+        return {doc.tags: model.encode(doc.words).tolist() for doc in tagged_corpus}

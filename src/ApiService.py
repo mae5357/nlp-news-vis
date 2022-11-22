@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import time
 from abc import ABC, abstractmethod
 from datetime import date
@@ -168,14 +169,18 @@ class NewsIoApi(ApiService):
 
 class HuffPostApi(ApiService):
 
-    def __init__(self, limit=1000):
+    def __init__(self, limit=1000, rand_sample=False):
         self.limit = limit
+        self.rand_sample = rand_sample
 
     def get_articles(self, path):
         articles_json = self.get_from_file(path)
 
         if self.limit:
-            articles_json = articles_json[:self.limit]
+            if self.rand_sample:
+                articles_json = random.choices(articles_json, k=self.limit)
+            else:
+                articles_json = articles_json[:self.limit]
 
         return articles_json
 
