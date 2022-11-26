@@ -169,9 +169,10 @@ class NewsIoApi(ApiService):
 
 class HuffPostApi(ApiService):
 
-    def __init__(self, limit=1000, rand_sample=False):
+    def __init__(self, limit=1000, rand_sample=False, seed=120):
         self.limit = limit
         self.rand_sample = rand_sample
+        random.seed(seed)
 
     def get_articles(self, path):
         articles_json = self.get_from_file(path)
