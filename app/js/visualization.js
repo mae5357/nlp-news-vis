@@ -9,7 +9,7 @@ INNER_HEIGHT = OUTER_HEIGHT - (MARGIN.TOP + MARGIN.BOTTOM);
 // just splitting the filename on "." and recomposing based on
 // dropdown selections to locate/display
 DATA_PATH = "data/";
-DATA_FILE = "huffpost1000.nltk.doc2vec.pca.json";
+DATA_FILE = "huffpost1000.none.bert.pca.json";
 
 // this isn't necessary with static files, but saving for posterity
 const toggleLoadingSpinner = () => {
@@ -42,7 +42,7 @@ $("#dropdown-reducer a").click(function() {
 // determine new file name and reload viz
 const set_selection = (type, index, selection) => {
     proc_selections = DATA_FILE.split(".");
-    proc_selections[index] = selection;
+    proc_selections[index] = selection.toLowerCase();
     if (index === 2) {
         if ("bert" === selection.toLowerCase())
             proc_selections[1] = "none";
@@ -52,6 +52,7 @@ const set_selection = (type, index, selection) => {
     DATA_FILE = proc_selections.join(".");
     $("#" + type).children(":first").html(selection + '<span class="caret">');
     $("#legend-menu").children(":first").html("Legend" + '<span class="caret">');
+    $("#plot-title").text(proc_selections[0] + "\xa0\xa0 /  \xa0\xa0" + proc_selections[2] + "\xa0\xa0 / \xa0\xa0" + proc_selections[3]);
     get_samples();
 }
 
@@ -79,10 +80,10 @@ const get_samples = () => {
         const catPalette = ["#1b70fc", "#d50527", "#158940", "#f898fd", "#24c9d7", "#cb9b64", "#866888", "#22e67a", "#e509ae", "#9dabfa", "#437e8a", "#b21bff", "#ff7b91", "#94aa05", "#ac5906", "#82a68d", "#fe6616", "#7a7352", "#f9bc0f", "#b65d66", "#07a2e6", "#c091ae", "#8a91a7", "#88fc07", "#ea42fe", "#9e8010", "#10b437", "#c281fe", "#f92b75", "#07c99d", "#a946aa", "#bfd544", "#16977e", "#ff6ac8", "#a88178", "#5776a9", "#678007", "#fa9316", "#85c070", "#6aa2a9", "#989e5d", "#fe9169", "#cd714a", "#6ed014", "#c5639c", "#c23271", "#698ffc", "#678275", "#c5a121", "#a978ba", "#ee534e", "#d24506", "#59c3fa", "#ca7b0a", "#6f7385", "#9a634a", "#48aa6f", "#ad9ad0", "#d7908c", "#6a8a53", "#8c46fc", "#8f5ab8", "#fd1105", "#7ea7cf", "#d77cd1", "#a9804b", "#0688b4", "#6a9f3e", "#ee8fba", "#a67389", "#9e8cfe", "#bd443c", "#6d63ff", "#d110d5", "#798cc3", "#df5f83", "#b1b853", "#bb59d8", "#1d960c", "#867ba8", "#18acc9", "#25b3a7", "#f3db1d", "#938c6d", "#936a24", "#a964fb", "#92e460", "#a05787", "#9c87a0", "#20c773", "#8b696d", "#78762d", "#e154c6", "#40835f", "#d73656", "#1afd5c", "#c4f546", "#3d88d8", "#bd3896", "#1397a3", "#f940a5", "#66aeff", "#d097e7", "#fe6ef9", "#d86507", "#8b900a", "#d47270", "#e8ac48", "#cf7c97", "#cebb11", "#718a90", "#e78139", "#ff7463", "#bea1fd"];
         const sourcePalette = catPalette.slice(10);
 
-        const categories = [...new Set(data.map(d => d['category']))];
+        const categories = [...new Set(data.map(d => d['category']))].sort();
         const categoryScale = d3.scaleOrdinal().range(catPalette.slice(0, categories.length)).domain(categories);
 
-        const sources = [...new Set(data.map(d => d['source']))];
+        const sources = [...new Set(data.map(d => d['source']))].sort();
         const sourceScale = d3.scaleOrdinal().range(sourcePalette.slice(0, sources.length)).domain(sources);
 
         const dates = [...new Set(data.map(d => d['date']))];
@@ -217,12 +218,10 @@ const get_samples = () => {
               .attr("id", "tooltip")
               .style("visibility", "hidden")
               .style("max-width", "200px")
-              .style("opacity", 1)
-              .style("background-color", "white")
-              .style("border", "solid")
-              .style("border-width", "2px")
+              .style("background-color", "#fff")
+              .style("border", "2px solid gray")
               .style("border-radius", "5px")
-              .style("padding", "5px");
+              .style("padding", "8px");
 
 
         // create legend with dots and labels using selectedDimension mapping

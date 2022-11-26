@@ -7,10 +7,15 @@
     /*min-width: 1300px;*/
 }
 
+#plot-title {
+    margin-top: 100px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
 #chart-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 100px;
     min-width: 1200px;
     border-top: 1px solid gray;
     border-bottom: 1px solid gray;
