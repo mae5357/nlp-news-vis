@@ -9,7 +9,7 @@ INNER_HEIGHT = OUTER_HEIGHT - (MARGIN.TOP + MARGIN.BOTTOM);
 // just splitting the filename on "." and recomposing based on
 // dropdown selections to locate/display
 DATA_PATH = "data/";
-DATA_FILE = "huffpost1000.none.bert.pca.json";
+DATA_FILE = "huffpost1000.none.bert.umap.json";
 
 // this isn't necessary with static files, but saving for posterity
 const toggleLoadingSpinner = () => {
