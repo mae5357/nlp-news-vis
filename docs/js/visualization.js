@@ -5,11 +5,24 @@ MARGIN = {TOP: 100, RIGHT: 150, BOTTOM: 50, LEFT: 150};
 INNER_WIDTH = OUTER_WIDTH - (MARGIN.LEFT + MARGIN.RIGHT);
 INNER_HEIGHT = OUTER_HEIGHT - (MARGIN.TOP + MARGIN.BOTTOM);
 
-// since we're serving data from a stati, preprocessed file
+// since we're serving data from a static, preprocessed file
 // just splitting the filename on "." and recomposing based on
-// dropdown selections to locate/display
+// dropdown selections to locate/display. a file is a combination
+// of dataset, preprocessor, vectorizor, reducer
+DATA_OPTS = ["HuffPost1000", "HuffPost5000", "NewsDataIO"];
+VECTORIZER_OPTS = ["Doc2Vec", "SentenceBERT"]
+REDUCER_OPTS = ["PCA", "T-SNE", "UMAP"]
 DATA_PATH = "data/";
-DATA_FILE = "huffpost1000.none.bert.umap.json";
+DATA_FILE = "huffpost1000.none.sentencebert.umap.json";
+
+const setNavDropdowns = (target, items) => {
+    items.forEach(item => {
+        target.append(`<li><a href="#">${item}</a></li>`);
+    });
+}
+setNavDropdowns($("#dropdown-dataset"), DATA_OPTS);
+setNavDropdowns($("#dropdown-vectorizer"), VECTORIZER_OPTS);
+setNavDropdowns($("#dropdown-reducer"), REDUCER_OPTS);
 
 // this isn't necessary with static files, but saving for posterity
 const toggleLoadingSpinner = () => {
@@ -44,7 +57,7 @@ const set_selection = (type, index, selection) => {
     proc_selections = DATA_FILE.split(".");
     proc_selections[index] = selection.toLowerCase();
     if (index === 2) {
-        if ("bert" === selection.toLowerCase())
+        if ("sentencebert" === selection.toLowerCase())
             proc_selections[1] = "none";
         else
             proc_selections[1] = "nltk";
@@ -63,6 +76,7 @@ const get_samples = () => {
     // though really this could be a more elegant d3 update somehow
     $("#plot-container").empty()
     $("#legend-container").empty()
+
 
     d3.json(DATA_PATH + DATA_FILE).then(res => {
         return res;
@@ -86,7 +100,7 @@ const get_samples = () => {
         const sources = [...new Set(data.map(d => d['source']))].sort();
         const sourceScale = d3.scaleOrdinal().range(sourcePalette.slice(0, sources.length)).domain(sources);
 
-        const dates = [...new Set(data.map(d => d['date']))];
+        const dates = [...new Set(data.map(d => d['date']))].sort().reverse();
         const dateScale = d3.scaleOrdinal().range(catPalette.slice(0, dates.length)).domain(dates);
 
         // this is an example gradient/quantile-based coloring. right now it is using
