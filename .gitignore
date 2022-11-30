@@ -136,4 +136,7 @@ data/clean_corpus/**
 data/raw_corpus/**
 data/embeddings/**
 
+# IDEA / IDE
 .vscode/
+*.iml
+*.idea

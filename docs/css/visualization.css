@@ -1,0 +1,75 @@
+.navbar-inverse .navbar-nav>li>a {
+    color: white;
+    padding-left: 50px;
+}
+
+.container {
+    /*min-width: 1300px;*/
+}
+
+#plot-title {
+    margin-top: 70px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+#chart-container {
+    display: flex;
+    justify-content: space-between;
+    min-width: 1200px;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+
+#plot-container {
+    width: 80%;
+    border-right: 1px solid gray;
+}
+
+#legend-container {
+    width: 20%;
+    max-height: 800px;
+    margin-top: 20px;
+    overflow-y: auto;
+}
+
+#data-spinner {
+    /*margin-top: 200px*/
+}
+
+.hidden {
+    display: none;
+}
+
+.dot {
+    stroke: gray;
+    /*stroke-width: 0.5;*/
+    opacity: 0.7;
+}
+
+#legend-container {
+    overflow-y: scroll;
+}
+
+.legend-text {
+    font-size: 14px;
+    text-transform: capitalize;
+}
+
+#legend-menu>a {
+    text-transform: capitalize;
+}
+
+.legend-dot {
+    stroke: gray;
+    opacity: 0.2;
+}
+
+.focused {
+    opacity: 0.8;
+}
+
+.similarity-line {
+    stroke: gray;
+    stroke-linecap: round;
+}
