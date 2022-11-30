@@ -22,8 +22,8 @@ See https://public.tableau.com/views/newsscatterplotproofofconcept/Sheet1?:showV
 ### Make a virtual environment & install dependencies
 
 (assuming you already have conda and python3 installed)
-```
-git clone git@github.com:mae5357/nlp-news-vis.git
+```bash
+git clone https://github.com/mae5357/nlp-news-vis
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
