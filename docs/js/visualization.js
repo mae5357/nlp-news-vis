@@ -29,9 +29,13 @@ const toggleLoadingSpinner = () => {
     document.getElementById("data-spinner").classList.toggle("hidden");
 };
 
+var similaritySelections = [];
 $("#plot-container").click(function() {
-    if ("tooltip" != $(this).attr("id"))
+    if ("tooltip" != $(this).attr("id")) {
         $("#tooltip").css("visibility", "hidden");
+        d3.selectAll("#similarity-line").remove();
+        similaritySelections = [];
+    }
 });
 
 // dataset selector
@@ -188,9 +192,10 @@ const get_samples = () => {
         var zoom = d3.zoom()
             .scaleExtent([1, 8])
             .on("zoom", function(e) {
+                d3.selectAll("#similarity-line").remove();
                 currentScale = e.transform.k // hack to access current scale from outside
                 scatterPlot.attr("transform", e.transform);
-                scatterPlot.selectAll(".dot").attr("r", 6 / currentScale);
+                scatterPlot.selectAll(".dot").attr("r", 6 / currentScale).attr("stroke-width", currentScale / 3 / currentScale);
 //                scatterPlot.selectAll(".dot").attr("r", 6 / (1 + Math.log(currentScale) * 2));
             });
         svg.call(zoom);
@@ -407,26 +412,78 @@ const get_samples = () => {
                     .attr("fill", function(d) {
                         return legendDimensions[selectedLegendDimension]["getDotColor"](d);
                     })
+                    .style("stroke-width", currentScale / 3 / currentScale)
                     .on("click", function(e, d) {
                         e.stopPropagation();
-                        tooltip.style("visibility", "visible")
-                            .style("left", `${e.pageX + 15}px`)
-                            .style("top", `${e.pageY}px`)
-                            .html(
-                                `<div>
-                                    Category: ${d['category']}<br/>
-                                    Source: ${d['source']}<br/>
-                                    <p>Date: ${d['date']}</p>
-                                    <p>Title: ${d['title']}</p>
-                                    <p>Description:
-                                      ${d['description']}</p>
-                                </div>`
-                            )
+                        if (e.shiftKey) {
+                            if (similaritySelections.length === 0) {
+                                similaritySelections.push(d["coordinates"]);
+                            }
+                            else if (similaritySelections.length === 1) {
+                                similaritySelections.push(d["coordinates"]);
+                                simScore = getSimilarityScore();
+                                drawSimLine(simScore);
+                                console.log(simScore);
+                            }
+                            else if (similaritySelections.length === 2) {
+                                similaritySelections[1] = d["coordinates"];
+                                simScore = getSimilarityScore();
+                                drawSimLine(simScore);
+                                console.log(simScore);
+                            }
+                        }
+                        else {
+                            tooltip.style("visibility", "visible")
+                                .style("left", `${e.pageX + 15}px`)
+                                .style("top", `${e.pageY}px`)
+                                .html(
+                                    `<div>
+                                        Category: ${d['category']}<br/>
+                                        Source: ${d['source']}<br/>
+                                        <p>Date: ${d['date']}</p>
+                                        <p>Title: ${d['title']}</p>
+                                        <p>Description:
+                                          ${d['description']}</p><br/>
+                                        Coordinates:<br/>
+                                        ${d['coordinates'][0].toFixed(4)}, ${d['coordinates'][1].toFixed(4)}
+                                    </div>`
+                                )
+                        }
                     });
 
             scatterPlotUpdate.exit().remove();
 
             scatterPlotEnter.merge(scatterPlotUpdate)
+        }
+
+        function getSimilarityScore() {
+            let x1 = similaritySelections[0][0];
+            let x2 = similaritySelections[1][0];
+            let y1 = similaritySelections[0][1];
+            let y2 = similaritySelections[1][1];
+            return ((x1*x2)+(y1*y2)) / Math.sqrt(((x1**2) + (y1**2)) * ((x2**2) + (y2**2)));
+        }
+
+        function drawSimLine(simScore) {
+            let roundedSimScore = Math.floor(simScore * 10000) / 100;
+            d3.selectAll("#similarity-line").remove();
+            var simLineGroup = scatterPlot.append("g")
+                                .attr("id", "similarity-line");
+            simLineGroup.append("line")
+                .attr("class", "similarity-line")
+                .attr("x1", xScale(similaritySelections[0][0]))
+                .attr("x2", xScale(similaritySelections[1][0]))
+                .attr("y1", yScale(similaritySelections[0][1]))
+                .attr("y2", yScale(similaritySelections[1][1]))
+                .style("stroke-width", 2 / currentScale);
+
+            simLineGroup.append("text")
+                .text(roundedSimScore)
+                .attr("x", xScale(similaritySelections[1][0]))
+                .attr("y", yScale(similaritySelections[1][1]))
+                .attr("transform", `translate(${20 / currentScale}, ${20 / currentScale})`)
+                .style("font-size", 14 / currentScale);
+
         }
     });
 };
