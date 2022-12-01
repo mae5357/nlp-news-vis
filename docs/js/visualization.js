@@ -421,15 +421,15 @@ const get_samples = () => {
                             }
                             else if (similaritySelections.length === 1) {
                                 similaritySelections.push(d["coordinates"]);
-                                simScore = getSimilarityScore();
-                                drawSimLine(simScore);
-                                console.log(simScore);
+                                simScores = getSimilarityScores();
+                                drawSimLine(simScores, e);
+                                console.log(simScores);
                             }
                             else if (similaritySelections.length === 2) {
                                 similaritySelections[1] = d["coordinates"];
-                                simScore = getSimilarityScore();
-                                drawSimLine(simScore);
-                                console.log(simScore);
+                                simScores = getSimilarityScores();
+                                drawSimLine(simScores, e);
+                                console.log(simScores);
                             }
                         }
                         else {
@@ -456,16 +456,17 @@ const get_samples = () => {
             scatterPlotEnter.merge(scatterPlotUpdate)
         }
 
-        function getSimilarityScore() {
+        function getSimilarityScores() {
             let x1 = similaritySelections[0][0];
             let x2 = similaritySelections[1][0];
             let y1 = similaritySelections[0][1];
             let y2 = similaritySelections[1][1];
-            return ((x1*x2)+(y1*y2)) / Math.sqrt(((x1**2) + (y1**2)) * ((x2**2) + (y2**2)));
+            let cosineScore = ((x1*x2)+(y1*y2)) / Math.sqrt(((x1**2) + (y1**2)) * ((x2**2) + (y2**2)));
+            let euclideanScore = Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+            return {"cosine": Math.floor(cosineScore * 10000) / 100, "euclidean": Math.floor(euclideanScore * 10000) / 100};
         }
 
-        function drawSimLine(simScore) {
-            let roundedSimScore = Math.floor(simScore * 10000) / 100;
+        function drawSimLine(simScores, e) {
             d3.selectAll("#similarity-line").remove();
             var simLineGroup = scatterPlot.append("g")
                                 .attr("id", "similarity-line");
@@ -477,12 +478,17 @@ const get_samples = () => {
                 .attr("y2", yScale(similaritySelections[1][1]))
                 .style("stroke-width", 2 / currentScale);
 
-            simLineGroup.append("text")
-                .text(roundedSimScore)
-                .attr("x", xScale(similaritySelections[1][0]))
-                .attr("y", yScale(similaritySelections[1][1]))
-                .attr("transform", `translate(${20 / currentScale}, ${20 / currentScale})`)
-                .style("font-size", 14 / currentScale);
+            tooltip.style("visibility", "visible")
+                .style("left", `${e.pageX + 15}px`)
+                .style("top", `${e.pageY}px`)
+                .html(
+                    `<div>
+                        <p>Cosine Similarity<br/>
+                        ${simScores["cosine"]}</p>
+                        Euclidean Similarity<br/>
+                        ${simScores["euclidean"]}
+                    </div>`
+                )
 
         }
     });
