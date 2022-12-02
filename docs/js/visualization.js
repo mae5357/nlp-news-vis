@@ -15,6 +15,29 @@ REDUCER_OPTS = ["PCA", "T-SNE", "UMAP"]
 DATA_PATH = "data/";
 DATA_FILE = "huffpost1000.none.sentencebert.umap.json";
 
+// clustering accuracy map (primarily for report discussion)
+clusterAccuracyMap = {
+    "huffpost1000.nltk.doc2vec.pca.json": 21.55650715283065,
+    "huffpost1000.nltk.doc2vec.t-sne.json": 35.84427788953499,
+    "huffpost1000.nltk.doc2vec.umap.json": 42.81597170795394,
+    "huffpost1000.none.sentencebert.pca.json": 48.12283533729999,
+    "huffpost1000.none.sentencebert.t-sne.json": 20.167590053582384,
+    "huffpost1000.none.sentencebert.umap.json": 44.848890635495955,
+    "huffpost5000.nltk.doc2vec.pca.json": 37.99464363709401,
+    "huffpost5000.nltk.doc2vec.t-sne.json": 49.37501233387292,
+    "huffpost5000.nltk.doc2vec.umap.json": 25.565126444729145,
+    "huffpost5000.none.sentencebert.pca.json": 21.863377214563254,
+    "huffpost5000.none.sentencebert.t-sne.json": 20.42755301358742,
+    "huffpost5000.none.sentencebert.umap.json": 30.463620071550096,
+    "newsdataio.nltk.doc2vec.pca.json": 25.61454980657747,
+    "newsdataio.nltk.doc2vec.t-sne.json": 22.80831986622652,
+    "newsdataio.nltk.doc2vec.umap.json": 34.170600866609824,
+    "newsdataio.none.sentencebert.pca.json": 37.202767654288245,
+    "newsdataio.none.sentencebert.t-sne.json": 32.494272044495126,
+    "newsdataio.none.sentencebert.umap.json": 38.00
+}
+$("#cluster-accuracy").text("Clustering Accuracy: " + clusterAccuracyMap[DATA_FILE].toFixed(2));
+
 const setNavDropdowns = (target, items) => {
     items.forEach(item => {
         target.append(`<li><a href="#">${item}</a></li>`);
@@ -56,7 +79,7 @@ $("#dropdown-reducer a").click(function() {
     set_selection("reducer", 3, $(this).text());
 });
 
-// determine new file name and reload viz
+// determine new file name, reload viz, update titles
 const set_selection = (type, index, selection) => {
     proc_selections = DATA_FILE.split(".");
     proc_selections[index] = selection.toLowerCase();
@@ -70,6 +93,7 @@ const set_selection = (type, index, selection) => {
     $("#" + type).children(":first").html(selection + '<span class="caret">');
     $("#legend-menu").children(":first").html("Legend" + '<span class="caret">');
     $("#plot-title").text(proc_selections[0] + "\xa0\xa0 /  \xa0\xa0" + proc_selections[2] + "\xa0\xa0 / \xa0\xa0" + proc_selections[3]);
+    $("#cluster-accuracy").text("Clustering Accuracy: " + clusterAccuracyMap[DATA_FILE].toFixed(2));
     get_samples();
 }
 
@@ -421,15 +445,15 @@ const get_samples = () => {
                             }
                             else if (similaritySelections.length === 1) {
                                 similaritySelections.push(d["coordinates"]);
-                                simScore = getSimilarityScore();
-                                drawSimLine(simScore);
-                                console.log(simScore);
+                                simScores = getSimilarityScores();
+                                drawSimLine(simScores, e);
+                                console.log(simScores);
                             }
                             else if (similaritySelections.length === 2) {
                                 similaritySelections[1] = d["coordinates"];
-                                simScore = getSimilarityScore();
-                                drawSimLine(simScore);
-                                console.log(simScore);
+                                simScores = getSimilarityScores();
+                                drawSimLine(simScores, e);
+                                console.log(simScores);
                             }
                         }
                         else {
@@ -456,16 +480,17 @@ const get_samples = () => {
             scatterPlotEnter.merge(scatterPlotUpdate)
         }
 
-        function getSimilarityScore() {
+        function getSimilarityScores() {
             let x1 = similaritySelections[0][0];
             let x2 = similaritySelections[1][0];
             let y1 = similaritySelections[0][1];
             let y2 = similaritySelections[1][1];
-            return ((x1*x2)+(y1*y2)) / Math.sqrt(((x1**2) + (y1**2)) * ((x2**2) + (y2**2)));
+            let cosineScore = ((x1*x2)+(y1*y2)) / Math.sqrt(((x1**2) + (y1**2)) * ((x2**2) + (y2**2)));
+            let euclideanScore = Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+            return {"cosine": Math.floor(cosineScore * 100) / 100, "euclidean": euclideanScore.toFixed(2)};
         }
 
-        function drawSimLine(simScore) {
-            let roundedSimScore = Math.floor(simScore * 10000) / 100;
+        function drawSimLine(simScores, e) {
             d3.selectAll("#similarity-line").remove();
             var simLineGroup = scatterPlot.append("g")
                                 .attr("id", "similarity-line");
@@ -477,12 +502,17 @@ const get_samples = () => {
                 .attr("y2", yScale(similaritySelections[1][1]))
                 .style("stroke-width", 2 / currentScale);
 
-            simLineGroup.append("text")
-                .text(roundedSimScore)
-                .attr("x", xScale(similaritySelections[1][0]))
-                .attr("y", yScale(similaritySelections[1][1]))
-                .attr("transform", `translate(${20 / currentScale}, ${20 / currentScale})`)
-                .style("font-size", 14 / currentScale);
+            tooltip.style("visibility", "visible")
+                .style("left", `${e.pageX + 15}px`)
+                .style("top", `${e.pageY}px`)
+                .html(
+                    `<div>
+                        <p>Cosine Similarity<br/>
+                        ${simScores["cosine"]}</p>
+                        Euclidean Similarity<br/>
+                        ${simScores["euclidean"]}
+                    </div>`
+                )
 
         }
     });
