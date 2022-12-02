@@ -14,9 +14,7 @@ Before installation, please complete the following prerequisites:
 - Install python3 locally
 - Create a Kaggle account
 
-After installing conda and python3 locally, you will now have the option to run our visualization application locally. However, even if you do not, you will still be able to run the visualization application by visiting the github.io address listed in the "EXECUTION" section.
-
-If you wish to run any of the Python scripts, additional steps are required. After satisfying the prerequisites, you will have to create a virtual environment and install the required dependencies. To do so, enter the following commands into your command prompt/terminal in the specified order:
+After satisfying the prerequisites, you will have to create a virtual environment and install the required dependencies. To do so, enter the following commands into your command prompt/terminal in the specified order:
 1) conda create -n venv python=3.8
 2) conda activate venv
 3) conda install git
