@@ -487,7 +487,7 @@ const get_samples = () => {
             let y2 = similaritySelections[1][1];
             let cosineScore = ((x1*x2)+(y1*y2)) / Math.sqrt(((x1**2) + (y1**2)) * ((x2**2) + (y2**2)));
             let euclideanScore = Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
-            return {"cosine": Math.floor(cosineScore * 10000) / 100, "euclidean": Math.floor(euclideanScore * 10000) / 100};
+            return {"cosine": Math.floor(cosineScore * 100) / 100, "euclidean": euclideanScore.toFixed(2)};
         }
 
         function drawSimLine(simScores, e) {
