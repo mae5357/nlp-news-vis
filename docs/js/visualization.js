@@ -15,6 +15,29 @@ REDUCER_OPTS = ["PCA", "T-SNE", "UMAP"]
 DATA_PATH = "data/";
 DATA_FILE = "huffpost1000.none.sentencebert.umap.json";
 
+// clustering accuracy map (primarily for report discussion)
+clusterAccuracyMap = {
+    "huffpost1000.nltk.doc2vec.pca.json": 21.55650715283065,
+    "huffpost1000.nltk.doc2vec.t-sne.json": 35.84427788953499,
+    "huffpost1000.nltk.doc2vec.umap.json": 42.81597170795394,
+    "huffpost1000.none.sentencebert.pca.json": 48.12283533729999,
+    "huffpost1000.none.sentencebert.t-sne.json": 20.167590053582384,
+    "huffpost1000.none.sentencebert.umap.json": 44.848890635495955,
+    "huffpost5000.nltk.doc2vec.pca.json": 37.99464363709401,
+    "huffpost5000.nltk.doc2vec.t-sne.json": 49.37501233387292,
+    "huffpost5000.nltk.doc2vec.umap.json": 25.565126444729145,
+    "huffpost5000.none.sentencebert.pca.json": 21.863377214563254,
+    "huffpost5000.none.sentencebert.t-sne.json": 20.42755301358742,
+    "huffpost5000.none.sentencebert.umap.json": 30.463620071550096,
+    "newsdataio.nltk.doc2vec.pca.json": 25.61454980657747,
+    "newsdataio.nltk.doc2vec.t-sne.json": 22.80831986622652,
+    "newsdataio.nltk.doc2vec.umap.json": 34.170600866609824,
+    "newsdataio.none.sentencebert.pca.json": 37.202767654288245,
+    "newsdataio.none.sentencebert.t-sne.json": 32.494272044495126,
+    "newsdataio.none.sentencebert.umap.json": 38.00
+}
+$("#cluster-accuracy").text("Clustering Accuracy: " + clusterAccuracyMap[DATA_FILE].toFixed(2));
+
 const setNavDropdowns = (target, items) => {
     items.forEach(item => {
         target.append(`<li><a href="#">${item}</a></li>`);
@@ -56,7 +79,7 @@ $("#dropdown-reducer a").click(function() {
     set_selection("reducer", 3, $(this).text());
 });
 
-// determine new file name and reload viz
+// determine new file name, reload viz, update titles
 const set_selection = (type, index, selection) => {
     proc_selections = DATA_FILE.split(".");
     proc_selections[index] = selection.toLowerCase();
@@ -70,6 +93,7 @@ const set_selection = (type, index, selection) => {
     $("#" + type).children(":first").html(selection + '<span class="caret">');
     $("#legend-menu").children(":first").html("Legend" + '<span class="caret">');
     $("#plot-title").text(proc_selections[0] + "\xa0\xa0 /  \xa0\xa0" + proc_selections[2] + "\xa0\xa0 / \xa0\xa0" + proc_selections[3]);
+    $("#cluster-accuracy").text("Clustering Accuracy: " + clusterAccuracyMap[DATA_FILE].toFixed(2));
     get_samples();
 }
 

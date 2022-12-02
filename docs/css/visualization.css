@@ -7,9 +7,11 @@
     /*min-width: 1300px;*/
 }
 
-#plot-title {
+#title-container {
     margin-top: 70px;
-    margin-bottom: 15px;
+    align-items: baseline;
+}
+#plot-title {
     text-transform: uppercase;
 }
 
