@@ -1,6 +1,6 @@
 # Team 120 Paranormal Distribution
 
-# Quick Start
+## Quick Start
 - Get a simple python server going: `python3 -m http.server 8888`
 - Navigate to the app: `http://localhost:8888/docs/`
 
@@ -36,13 +36,3 @@ You might need to make a kaggle account.
 https://www.kaggle.com/datasets/rmisra/news-category-dataset
 
 Place json file `data/` directory.
-
-## Housekeeping
-
-Do not commit data or dependancies to repo (see .gitignore)
-
-Update `requirements.txt` every time you add a package.
-
-Create branches with `{your-name}.{purpose-of-branch}
-
-It would be good to have someone review before merging branches, but this is not strictly necessary.
