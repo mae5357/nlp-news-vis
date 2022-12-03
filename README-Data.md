@@ -7,9 +7,9 @@ The processing portion of the project is broken into 4 major areas:
 - __Vectorizer__:  Doc2Vec and Bert classes that transform the text into vectors.
 - __DimReducer__:  These are the classes that reduce the high-count vectors down to just (x, y) coordinates.  
 
-## Datasets
-The __HuffPost__ dataset was downloaded from Kaggle and not included here due to its size. It can be found at https://www.kaggle.com/datasets/rmisra/news-category-dataset and saved locally to be used in the example below.  
-The __NewsDataIO__ api was also used to download around 1000 articles with full content for article length comparisons.  This api enforces daily limits that required us to pull smaller batches over the course of the project and is also not included due to its size.
+## Datasets (/data/raw)
+The __HuffPost__ dataset was downloaded from Kaggle at https://www.kaggle.com/datasets/rmisra/news-category-dataset and formatted from its original csv version to json.  
+The __NewsDataIO__ api was also used to download around 1000 articles with full content for article length comparisons.  This api enforces daily limits that required us to pull smaller batches over the course of the project.
 
 ## Example Notebook/Script Steps
 The following is also already included in the `/src/sandbox.py` file.
