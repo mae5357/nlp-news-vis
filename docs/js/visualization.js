@@ -463,7 +463,7 @@ const get_samples = () => {
                                 .html(
                                     `<div>
                                         Category: ${d['category']}<br/>
-                                        Source: ${d['source']}<br/>
+                                        Source: <a href=${d['link']}>${d['source']}</a><br/>
                                         <p>Date: ${d['date']}</p>
                                         <p>Title: ${d['title']}</p>
                                         <p>Description:
